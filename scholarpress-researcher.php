@@ -48,7 +48,7 @@ class ScholarPress_Researcher {
 		add_action( 'scholarpress_researcher_init', array( $this, 'textdomain' ) );
 		
 		// Add shortcode
-		add_shortcode('spresearcher', array($this,'shortcode'));
+		add_shortcode('zotero', array($this,'shortcode'));
 	}
 
     /**
