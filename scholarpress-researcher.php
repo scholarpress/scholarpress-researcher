@@ -150,7 +150,7 @@ class ScholarPress_Researcher {
                     $item = $zotero->getUserItem($user_id, $item_key, $params);
                     return $this->display_zotero_item($item);
                 } else {
-                    if ($items = $zotero->getUserItems($user_id, $params)) {
+                    if ($items = $zotero->getUserItemsTop($user_id, $params)) {
                         return $this->display_zotero_items($items);
                     }
                 }
@@ -159,14 +159,20 @@ class ScholarPress_Researcher {
         }           
 	}
 	
-	function display_zotero_items($items) {
-        return 'Zotero items!';
+	function display_zotero_items($entries) {
+        if($items = $entries->getElementsByTagName("entry")){
+            $html = '';
+            foreach($items as $item) {
+                $html .= $this->display_zotero_item($item);
+            }
+            return $html;
+        }
 	}
 	
 	function display_zotero_item($item) {
         if($item->getElementsByTagName("content")->length > 0){
-            $content = $item->getElementsByTagName("content")->item(0)->nodeValue;
-            return $content;
+            $html = $item->getElementsByTagName("content")->item(0)->nodeValue;
+            return wpautop($html);
         }
 	}
 	
