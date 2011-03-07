@@ -26,8 +26,8 @@ Author URI: http://scholarpress.net/
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-class Scholarpress_Researcher {
-
+class ScholarPress_Researcher {
+    
     /**
      * ScholarPress Researcher constructor
      *
@@ -102,8 +102,92 @@ class Scholarpress_Researcher {
       	}
 	}
 	
-	function shortcode($attrs) {
-	    return 'ScholarPress Researcher';
+	function shortcode($attributes) {
+	    // extract the shortcode attributes
+        extract(shortcode_atts(array(
+            'user_id' => false,
+            'group_id' => false,
+            'view'  => 'items',
+            'api_key' => false,
+            'collection_key' => false,
+            'item_key' => false,
+            'tag_name' => false,
+            'content' => "bib",
+            'style' => false,
+            'order' => 'author',
+            'sort' => 'asc',
+            'limit' => "50",
+            'format' => false
+        ), $attributes));
+        
+        $params = array();
+        
+        if ($style)
+            $params['style'] = $style;
+        
+        if ($sort)
+            $params['sort'] = $sort;
+        
+        if ($content)
+            $params['content'] = $content;
+        
+        if ($limit)
+            $params['limit'] = $limit;
+
+        if ($order)
+            $params['order'] = $order;
+        
+        if ($format)
+            $params['format'] = $format;
+        
+        $zotero = new phpZotero($api_key);
+        
+        if ($group_id) {
+            return 'ScholarPress Researcher Group #'.$group_id;
+        } else {
+            if ($user_id) {
+                if ($item_key) {
+                    $item = $zotero->getUserItem($user_id, $item_key, $params);
+                    return $this->display_zotero_item($item);
+                } else {
+                    if ($items = $zotero->getUserItems($user_id, $params)) {
+                        return $this->display_zotero_items($items);
+                    }
+                }
+            }
+            return 'You need to user a user_id or group_id';
+        }           
+	}
+	
+	function display_zotero_items($items) {
+        return 'Zotero items!';
+	}
+	
+	function display_zotero_item($item) {
+        if($item->getElementsByTagName("content")->length > 0){
+            $content = $item->getElementsByTagName("content")->item(0)->nodeValue;
+            return $content;
+        }
+	}
+	
+	function display_zotero_tags($tags) {
+	    return 'Zotero tags!';
+	}
+	
+	function display_zotero_tag($tag) {
+	    return 'Zotero tag!';
+	}
+	
+	function display_zotero_collections($collections) {
+	    return 'Zotero collections!';
+	}
+	
+	function display_zotero_collection($collection) {
+	    return 'Zotero collection!';
+	}
+	
+	function display_zotero_groups($groups) {
+	    return 'Zotero groups!';
 	}
 }
 
