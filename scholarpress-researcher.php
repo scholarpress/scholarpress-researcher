@@ -27,7 +27,7 @@ Author URI: http://scholarpress.net/
 */
 
 class ScholarPress_Researcher {
-    
+        
     /**
      * ScholarPress Researcher constructor
      *
@@ -140,10 +140,20 @@ class ScholarPress_Researcher {
         if ($format)
             $params['format'] = $format;
         
+        // $apiKey = $this->getZoteroApiKey();
+        
         $zotero = new phpZotero($api_key);
         
         if ($group_id) {
-            return 'ScholarPress Researcher Group #'.$group_id;
+            if ($item_key) {
+                $item = $zotero->getGroupItem($group_id, $item_key, $params);
+                return $this->display_zotero_item($item);
+            } else {
+                if ($items = $zotero->getGroupItemsTop($group_id, $params)) {
+                    return $this->display_zotero_items($items);
+                }
+            }
+            return "ScholarPress Researcher Group #$group_id";
         } else {
             if ($user_id) {
                 if ($item_key) {
@@ -155,10 +165,9 @@ class ScholarPress_Researcher {
                     }
                 }
             }
-            return 'You need to user a user_id or group_id';
-        }           
+        }   
 	}
-	
+
 	function display_zotero_items($entries) {
         if($items = $entries->getElementsByTagName("entry")){
             $html = '';
