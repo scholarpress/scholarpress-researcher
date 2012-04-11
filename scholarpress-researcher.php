@@ -3,13 +3,13 @@
 Plugin Name: ScholarPress Researcher
 Plugin URI: http://scholarpress.net/researcher/
 Description: Integrate your Zotero account to create a research blog with WordPress
-Version: 1.0
-Author: Jeremy Boggs
+Version: 1.1
+Author: Jeremy Boggs, Sean Takats
 Author URI: http://scholarpress.net/
 */
 
 /*
-    Copyright (C) 2009-2011, Jeremy Boggs. All rights reserved.
+    Copyright (C) 2009-2012, Jeremy Boggs and Sean Takats. All rights reserved.
     
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ class ScholarPress_Researcher {
      * Includes other necessary plugin files.
      */
 	function includes() {
-	    require(dirname( __FILE__ ).'/phpZotero/phpZotero.php');
+	    require(dirname( __FILE__ ).'/libZotero/build/libZoteroSingle.php');
 	}
 
     /**
@@ -105,104 +105,63 @@ class ScholarPress_Researcher {
 	function shortcode($attributes) {
 	    // extract the shortcode attributes
         extract(shortcode_atts(array(
-            'user_id' => false,
-            'group_id' => false,
-            'view'  => 'items',
+            'library_type' => false,
+            'library_id' => false,
+            'library_slug' => "",
             'api_key' => false,
-            'collection_key' => false,
             'item_key' => false,
-            'tag_name' => false,
+            'collection_key' => false,
             'content' => "bib",
             'style' => false,
-            'order' => 'author',
+            'order' => 'creator',
             'sort' => 'asc',
             'limit' => "50",
-            'format' => false
+            'format' => false,
+            'tag_name' => false
         ), $attributes));
         
         $params = array();
         
+        if ($collection_key)
+            $params['collectionKey'] = $collection_key;
+
+        if ($content)
+            $params['content'] = $content;
+        
         if ($style)
             $params['style'] = $style;
+        
+        if ($order)
+            $params['order'] = $order;
         
         if ($sort)
             $params['sort'] = $sort;
         
-        if ($content)
-            $params['content'] = $content;
-        
         if ($limit)
             $params['limit'] = $limit;
 
-        if ($order)
-            $params['order'] = $order;
-        
         if ($format)
             $params['format'] = $format;
         
-        // $apiKey = $this->getZoteroApiKey();
+        if ($collection_key)
+            $params['collectionKey'] = $collection_key;
         
-        $zotero = new phpZotero($api_key);
+        $library = new Zotero_Library($library_type, $library_id, $library_slug, $api_key);
         
-        if ($group_id) {
-            if ($item_key) {
-                $item = $zotero->getGroupItem($group_id, $item_key, $params);
-                return $this->display_zotero_item($item);
-            } else {
-                if ($items = $zotero->getGroupItemsTop($group_id, $params)) {
-                    return $this->display_zotero_items($items);
-                }
-            }
-            return "ScholarPress Researcher Group #$group_id";
+        if ($item_key) {
+            $items[0] = $library->fetchItemBib($item_key, $style);            
         } else {
-            if ($user_id) {
-                if ($item_key) {
-                    $item = $zotero->getUserItem($user_id, $item_key, $params);
-                    return $this->display_zotero_item($item);
-                } else {
-                    if ($items = $zotero->getUserItemsTop($user_id, $params)) {
-                        return $this->display_zotero_items($items);
-                    }
-                }
-            }
-        }   
+            $items = $library->fetchItemsTop($params);
+        }
+        return $this->display_zotero_items($items);
 	}
 
-	function display_zotero_items($entries) {
-        if($items = $entries->getElementsByTagName("entry")){
-            $html = '';
-            foreach($items as $item) {
-                $html .= $this->display_zotero_item($item);
-            }
-            return $html;
+	function display_zotero_items($items) {
+        $html = '';
+        foreach($items as $item) {
+            $html .= $item->content;;
         }
-	}
-	
-	function display_zotero_item($item) {
-        if($item->getElementsByTagName("content")->length > 0){
-            $html = $item->getElementsByTagName("content")->item(0)->nodeValue;
-            return wpautop($html);
-        }
-	}
-	
-	function display_zotero_tags($tags) {
-	    return 'Zotero tags!';
-	}
-	
-	function display_zotero_tag($tag) {
-	    return 'Zotero tag!';
-	}
-	
-	function display_zotero_collections($collections) {
-	    return 'Zotero collections!';
-	}
-	
-	function display_zotero_collection($collection) {
-	    return 'Zotero collection!';
-	}
-	
-	function display_zotero_groups($groups) {
-	    return 'Zotero groups!';
+        return wpautop($html);
 	}
 }
 

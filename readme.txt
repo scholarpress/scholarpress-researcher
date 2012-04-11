@@ -1,5 +1,5 @@
 === ScholarPress Researcher ===
-Contributors: jeremyboggs
+Contributors: jeremyboggs, stakats
 Tags: researcher, bibliography, Zotero
 Requires at least: 2.9.2
 Tested up to: 2.9.2
@@ -12,4 +12,17 @@ ScholarPress researcher uses the Zotero API to display your library in WordPress
 
 2. Login to Wordpress Admin and activate the plugin.
 
-3. Using the SP Researcher menu, fill in the appropriate information for your Zotero User ID and API Key.
+3. Add shortcodes to pages and posts using the following parameters. Please see http://www.zotero.org/support/dev/server_api/read_api for further documentation.
+
+library_type: "user" or "group" (required)
+library_id: the ID associated with the library to be accessed (required)
+api_key: the API key required to access private libraries
+item_key: the item key if we're accessing a single Zotero item
+collection_key: the key of the collection to access if we're pulling a full collection
+style: the bibliographic style to use for formatting
+order: the column order used to return items, e.g. "creator", "dateAdded"
+sort: the sort order, "asc" or "desc"
+limit: the maximum number of items to retrieve.
+
+example: 
+[zotero library_id="58212" library_type="group" limit="20" api_key="jnrsdCcH1WJJECn9gNmNC5BL" collection_key="W5TQM8FV" style="chicago-note-bibliography"]

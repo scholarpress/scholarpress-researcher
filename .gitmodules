@@ -1,3 +1,3 @@
-[submodule "phpZotero"]
-	path = phpZotero
-	url = git://github.com/clioweb/phpZotero.git
+[submodule "libZotero"]
+	path = libZotero
+	url = https://github.com/fcheslack/libZotero.git
