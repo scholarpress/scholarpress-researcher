@@ -2,8 +2,8 @@
 Contributors: jeremyboggs, stakats
 Tags: researcher, bibliography, Zotero
 Requires at least: 2.9.2
-Tested up to: 2.9.2
-Stable tag: 1.0alpha
+Tested up to: 3.3.2
+Stable tag: 1.2
 
 ScholarPress researcher uses the Zotero API to display your library in WordPress.
 
