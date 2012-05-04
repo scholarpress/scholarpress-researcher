@@ -111,13 +111,14 @@ class ScholarPress_Researcher {
             'api_key' => false,
             'item_key' => false,
             'collection_key' => false,
-            'content' => "bib",
+            'content' => 'bib,coins',
             'style' => false,
             'order' => 'creator',
             'sort' => 'asc',
-            'limit' => "50",
+            'limit' => "100", //restrict the total items we'll fetch to 100 unless overridden
             'format' => false,
-            'tag_name' => false
+            'tag_name' => false,
+            'cache_time' => "3600" // cache defaults to one hour, uses APC
         ), $attributes));
         
         $params = array();
@@ -138,28 +139,56 @@ class ScholarPress_Researcher {
             $params['sort'] = $sort;
         
         if ($limit)
-            $params['limit'] = $limit;
+            $totalItemLimit = $limit;
 
         if ($format)
             $params['format'] = $format;
         
-        if ($collection_key)
-            $params['collectionKey'] = $collection_key;
+        if ($item_key)
+            $params['itemKey'] = $item_key;
         
-        $library = new Zotero_Library($library_type, $library_id, $library_slug, $api_key);
+        $base_url = "http://www.zotero.org";
+        $library = new Zotero_Library($library_type, $library_id, $library_slug, $api_key, $base_url, $cache_time);
+
+        // code to step through multiple requests for bibliographies longer than 100 items
         
-        if ($item_key) {
-            $items[0] = $library->fetchItemBib($item_key, $style);            
-        } else {
-            $items = $library->fetchItemsTop($params);
+        //start at the beginning of our list by setting an offset of 0
+        $offset = 0;
+        //limit to 100 items per http request
+        //this is the maximum number of items the API will return in a single request
+        $perRequestLimit = 100;
+        //keep count of the items we've gotten
+        $fetchedItemsCount = 0;
+        //keep track of whether there are more items to fetch
+        $moreItems = true;
+        //where we'll keep the list of items we retrieve
+        $items = array();
+        
+        //while there are more items and we haven't gotten to our limit yet
+        while(($fetchedItemsCount < $totalItemLimit) && $moreItems){
+            //fetching items starting at $offset with $perRequestLimit items per request
+            $fetchedItems = $library->fetchItemsTop(array_merge($params, array('limit'=>$perRequestLimit, 'start'=>$offset)));
+            //put the items from this last request into our array of items
+            $items = array_merge($items, $fetchedItems);
+            //update the count of items we've got and offset by that amount
+            $fetchedItemsCount += count($fetchedItems);
+            $offset = $fetchedItemsCount;
+            
+            //Zotero_Library keeps track of the last feed it got so we can check if there is a 'next' link
+            //indicating more results to be fetched
+            if(!isset($library->getLastFeed()->links['next'])){
+                $moreItems = false;
+            }
         }
+        
         return $this->display_zotero_items($items);
 	}
 
 	function display_zotero_items($items) {
         $html = '';
         foreach($items as $item) {
-            $html .= $item->content;;
+            $html .= Zotero_Lib_Utils::wrapLinks($item->bibContent);
+            $html .= htmlspecialchars_decode($item->subContents['coins']);
         }
         return wpautop($html);
 	}

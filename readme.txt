@@ -19,10 +19,10 @@ library_id: the ID associated with the library to be accessed (required)
 api_key: the API key required to access private libraries
 item_key: the item key if we're accessing a single Zotero item
 collection_key: the key of the collection to access if we're pulling a full collection
-style: the bibliographic style to use for formatting
+style: the bibliographic style to use for formatting (default is chicago-note-bibliography)
 order: the column order used to return items, e.g. "creator", "dateAdded"
 sort: the sort order, "asc" or "desc"
-limit: the maximum number of items to retrieve.
+limit: the maximum number of items to retrieve (default is 100)
 
 example: 
-[zotero library_id="58212" library_type="group" limit="20" api_key="jnrsdCcH1WJJECn9gNmNC5BL" collection_key="W5TQM8FV" style="chicago-note-bibliography"]
+[zotero library_id="58212" library_type="group" limit="20" api_key="jnrsdCcH1WJJECn9gNmNC5BL" collection_key="W5TQM8FV" style="apa"]
